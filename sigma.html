@@ -17,7 +17,7 @@
 </head>
 <body>
 
-  <h1>SIGMA DOMINATOR v10</h1>
+  <h1>SIGMA DOMINATOR v11</h1>
   <input type="text" id="ip" placeholder="ENTER TARGET IP..." style="width:300px;">
   <button onclick="dominate()">DOMINATE</button>
 
@@ -38,7 +38,7 @@
       const proof = document.getElementById('proof');
       proof.style.display = 'block';
       proof.innerHTML = `
-        <strong class="live">TARGET DOMINATED</strong><br><br>
+        <strong class="live">TARGET DOMINATED — FULL PROOF</strong><br><br>
         <strong>IP:</strong> ${data.ip}<br>
         <strong>LOCATION:</strong> ${data.city}, ${data.region}, ${data.country_name} (${data.country})<br>
         <strong>ISP:</strong> ${data.org || 'CLOAKED'}<br>
@@ -49,7 +49,7 @@
         <strong>POSTAL:</strong> ${data.postal || 'N/A'}<br>
         <strong>ASN:</strong> ${data.asn || 'N/A'}<br>
         <strong>LIVE MAP:</strong> <a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank">OPEN GOOGLE MAPS</a><br>
-        <strong>OPENSTREETMAP:</strong> <a href="https://www.openstreetmap.org/?mlat=${data.latitude}&mlon=${data.longitude}#map=16" target="_blank">OSM LINK</a>
+        <strong>OSM:</strong> <a href="https://www.openstreetmap.org/?mlat=${data.latitude}&mlon=${data.longitude}#map=16" target="_blank">OPEN OSM</a>
       `;
 
       const map = L.map('map').setView([data.latitude, data.longitude], 16);
@@ -69,11 +69,10 @@
           { name: 'Coordinates', value: `${data.latitude}, ${data.longitude}`, inline: true },
           { name: 'ISP', value: data.org || 'Unknown', inline: true },
           { name: 'Threat', value: data.threat?.is_tor ? 'TOR' : data.threat?.is_proxy ? 'PROXY' : 'Clean', inline: true },
-          { name: 'Map', value: `https://maps.google.com/?q=${data.latitude},${data.longitude}`, inline: false },
-          { name: 'Proof', value: 'Full device intel sent via bait page', inline: false }
+          { name: 'Map', value: `https://maps.google.com/?q=${data.latitude},${data.longitude}`, inline: false }
         ],
         timestamp: new Date().toISOString(),
-        footer: { text: 'Lxu00/MySite • SIGMA TRAP v10' }
+        footer: { text: 'Lxu00/MySite • NO PERMISSION' }
       };
 
       fetch(WEBHOOK, {
