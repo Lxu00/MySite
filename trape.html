@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sigma Tracer</title>
+  <title>SIGMA DOMINATOR</title>
   <style>
-    body { font-family: 'Courier New', monospace; background: #000; color: #0f0; text-align: center; padding: 2rem; margin: 0; }
-    h1 { color: #0f0; text-shadow: 0 0 10px #0f0; }
-    input, button { padding: 1rem; font-size: 1.2rem; margin: 0.5rem; background: #111; color: #0f0; border: 1px solid #0f0; }
-    button:hover { background: #0f0; color: #000; }
-    #map { width: 100%; height: 450px; margin: 2rem 0; border: 3px solid #0f0; }
-    .info { background: #111; padding: 1.5rem; margin: 1rem auto; border: 1px solid #0f0; max-width: 700px; text-align: left; font-family: monospace; display: none; }
-    .live { color: #f00; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 50% { opacity: 0.5; } }
+    body {font-family:'Courier New',monospace;background:#000;color:#0f0;text-align:center;padding:2rem;margin:0;}
+    h1 {color:#0f0;text-shadow:0 0 10px #0f0;}
+    input,button{padding:1rem;font-size:1.2rem;margin:0.5rem;background:#111;color:#0f0;border:1px solid #0f0;border-radius:4px;}
+    button:hover{background:#0f0;color:#000;}
+    #map{width:100%;height:500px;margin:2rem 0;border:3px solid #0f0;border-radius:8px;}
+    .proof{background:#111;padding:1.5rem;margin:1rem auto;border:1px solid #0f0;max-width:700px;text-align:left;font-family:monospace;display:none;border-radius:8px;}
+    .live{color:#f00;animation:pulse 1.5s infinite;}
+    @keyframes pulse{50%{opacity:0.5;}}
   </style>
 </head>
 <body>
 
-  <h1>SIGMA TRACER v9</h1>
-  <input type="text" id="ip" placeholder="Enter IP to DOMINATE..." style="width:300px;">
+  <h1>SIGMA DOMINATOR v10</h1>
+  <input type="text" id="ip" placeholder="ENTER TARGET IP..." style="width:300px;">
   <button onclick="dominate()">DOMINATE</button>
 
-  <div id="info" class="info"></div>
+  <div id="proof" class="proof"></div>
   <div id="map"></div>
 
   <script>
@@ -33,32 +33,35 @@
 
       const res = await fetch(`https://ipapi.co/${ip}/json/`);
       const data = await res.json();
-      if (data.error) return alert('INVALID TARGET');
+      if (data.error) return alert('TARGET NOT FOUND');
 
-      const info = document.getElementById('info');
-      info.style.display = 'block';
-      info.innerHTML = `
-        <strong class="live">TARGET LOCKED</strong><br><br>
+      const proof = document.getElementById('proof');
+      proof.style.display = 'block';
+      proof.innerHTML = `
+        <strong class="live">TARGET DOMINATED</strong><br><br>
         <strong>IP:</strong> ${data.ip}<br>
         <strong>LOCATION:</strong> ${data.city}, ${data.region}, ${data.country_name} (${data.country})<br>
-        <strong>ISP:</strong> ${data.org || 'HIDDEN'}<br>
+        <strong>ISP:</strong> ${data.org || 'CLOAKED'}<br>
         <strong>COORDINATES:</strong> ${data.latitude}, ${data.longitude}<br>
-        <strong>HOSTNAME:</strong> ${data.hostname || 'CLOAKED'}<br>
-        <strong>THREAT:</strong> ${data.threat?.is_tor ? 'TOR' : data.threat?.is_proxy ? 'PROXY' : 'CLEAN'}<br>
+        <strong>HOSTNAME:</strong> ${data.hostname || 'HIDDEN'}<br>
+        <strong>THREAT:</strong> ${data.threat?.is_tor ? 'TOR' : data.threat?.is_proxy ? 'PROXY/VPN' : 'CLEAN'}<br>
         <strong>TIMEZONE:</strong> ${data.timezone}<br>
-        <strong>LIVE MAP:</strong> <a href="https://www.google.com/maps?q=${data.latitude},${data.longitude}" target="_blank">OPEN IN GOOGLE MAPS</a>
+        <strong>POSTAL:</strong> ${data.postal || 'N/A'}<br>
+        <strong>ASN:</strong> ${data.asn || 'N/A'}<br>
+        <strong>LIVE MAP:</strong> <a href="https://maps.google.com/?q=${data.latitude},${data.longitude}" target="_blank">OPEN GOOGLE MAPS</a><br>
+        <strong>OPENSTREETMAP:</strong> <a href="https://www.openstreetmap.org/?mlat=${data.latitude}&mlon=${data.longitude}#map=16" target="_blank">OSM LINK</a>
       `;
 
       const map = L.map('map').setView([data.latitude, data.longitude], 16);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
       L.marker([data.latitude, data.longitude], {
-        icon: L.divIcon({ className: 'live', html: 'TARGET', iconSize: [100, 40] })
+        icon: L.divIcon({ className: 'live', html: 'TARGET', iconSize: [120, 50] })
       }).addTo(map)
-        .bindPopup(`<b class="live">TARGET: ${data.ip}</b><br>${data.city}, ${data.country_name}`)
+        .bindPopup(`<b class="live">DOMINATED: ${data.ip}</b><br>${data.city}, ${data.country_name}`)
         .openPopup();
 
       const embed = {
-        title: 'SIGMA DOMINATION EXECUTED',
+        title: 'SIGMA DOMINATION — FULL PROOF',
         color: 0xff0000,
         fields: [
           { name: 'Target IP', value: data.ip, inline: true },
@@ -66,10 +69,11 @@
           { name: 'Coordinates', value: `${data.latitude}, ${data.longitude}`, inline: true },
           { name: 'ISP', value: data.org || 'Unknown', inline: true },
           { name: 'Threat', value: data.threat?.is_tor ? 'TOR' : data.threat?.is_proxy ? 'PROXY' : 'Clean', inline: true },
-          { name: 'Map', value: `https://www.google.com/maps?q=${data.latitude},${data.longitude}`, inline: false }
+          { name: 'Map', value: `https://maps.google.com/?q=${data.latitude},${data.longitude}`, inline: false },
+          { name: 'Proof', value: 'Full device intel sent via bait page', inline: false }
         ],
         timestamp: new Date().toISOString(),
-        footer: { text: 'Lxu00/MySite • SIGMA TRAP v9' }
+        footer: { text: 'Lxu00/MySite • SIGMA TRAP v10' }
       };
 
       fetch(WEBHOOK, {
